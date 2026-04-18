@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArtVerse - My Account</title>
+    <link rel="stylesheet" th:href="@{/css/account.css}">
+</head>
+<body>
+<header class="top-header">
+    <div class="header-left">
+        <div class="header-logo">🎨 ArtVerse</div>
+    </div>
+
+    <nav class="header-nav">
+        <a th:href="@{/artworks}">Gallery</a>
+        <a th:href="@{/auctions}">Auctions</a>
+        <a th:href="@{/account(section='collection')}">My Collections</a>
+        <a th:href="@{/artists}">Artists</a>
+    </nav>
+
+    <div class="header-right">
+        <span th:text="${user.firstName}">Reet</span>
+        <a th:href="@{/logout}" class="logout-link">Logout</a>
+    </div>
+</header>
+
+<div class="account-page">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div>
+            <div class="logo">◎<span>ArtVerse</span></div>
+
+            <div class="nav-links">
+                <button class="nav-btn active" onclick="showSection('profileSection', this)">Profile</button>
+                <button class="nav-btn" onclick="showSection('walletSection', this)">Wallet</button>
+                <button class="nav-btn" onclick="showSection('resultSection', this)">Result</button>
+                <button class="nav-btn" onclick="showSection('shippingSection', this)">Shipping Address</button>
+                <button class="nav-btn" onclick="showSection('collectionSection', this)">My Collection</button>
+                <button class="nav-btn" onclick="showSection('listingSection', this)">My Listings</button>
+
+            </div>
+        </div>
+
+        <div class="logout-box">
+            <a th:href="@{/logout}" class="logout-btn logout-link-btn">LOGOUT</a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <!-- PROFILE SECTION -->
+        <section id="profileSection" class="content-section active">
+            <div class="profile-top-banner"></div>
+
+            <div class="profile-card">
+                <div class="profile-left">
+                    <div class="avatar-box">
+                        <div class="avatar-circle">
+                            <span th:text="${user.firstName != null and !#strings.isEmpty(user.firstName) ? #strings.substring(user.firstName,0,1) : 'U'}">R</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-info">
+                        <h1 th:text="${user.firstName + ' ' + user.lastName}">Reet Sharma</h1>
+                        <p>
+                            <span th:text="${user.email}">reet@artverse.io</span>
+                            &nbsp; • &nbsp;
+                            Member since
+                            <span th:text="${#temporals.format(user.createdAt, 'MMMM yyyy')}">January 2026</span>
+                            &nbsp; • &nbsp;
+                            <span th:text="${user.isActive} ? 'Active Account' : 'Inactive Account'">Active Account</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <button class="action-btn" type="button">Share</button>
+                    <button class="action-btn primary" type="button">Edit Profile</button>
+                </div>
+            </div>
+            <h2 class="section-title">Dashboard Overview</h2>
+
+            <div class="stats-grid">
+                <div class="stat-card card-peach">
+                    <h4>Wallet Balance</h4>
+                    <h2>Available Balance</h2>
+                    <p th:text="'₹ ' + ${walletBalance}">₹ 0</p>
+                </div>
+
+                <div class="stat-card card-pink">
+                    <h4>Purchased Art</h4>
+                    <h2>Owned Artwork</h2>
+                    <p th:text="${purchasedCount} + ' Pieces'">0 Pieces</p>
+                </div>
+
+                <div class="stat-card card-cream">
+                    <h4>Total Listings</h4>
+                    <h2>Created by You</h2>
+                    <p th:text="${listingCount} + ' Active'">0 Active</p>
+                </div>
+
+                <div class="stat-card card-green">
+                    <h4>Bids Placed</h4>
+                    <h2>Your Offers</h2>
+                    <p th:text="${bidsCount} + ' Offers'">0 Offers</p>
+                </div>
+            </div>
+
+            <div class="dual-section">
+                <!-- Recent Purchases -->
+                <div>
+                    <div class="sub-header">
+                        <h3>Recent Purchases</h3>
+                        <a href="#">See All</a>
+                    </div>
+
+                    <div class="cards-row">
+                        <div class="art-card" th:each="a : ${recentPurchases}">
+                            <div class="art-image"
+                                 th:style="${a.artworkImageUrl != null} ? 'background-image:url(' + ${a.artworkImageUrl} + ');' : ''">
+                            </div>
+
+                            <div class="art-body">
+                                <div class="art-title" th:text="${a.artworkTitle}">Artwork Title</div>
+                                <div class="art-artist" th:text="'by ' + ${a.artistName}">by Artist</div>
+                                <div class="art-footer">
+                                    <span class="price" th:text="'₹ ' + ${a.currentBid}">₹ 0</span>
+                                    <a th:href="@{/auction/{id}(id=${a.id})}">View Details</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="placeholder-box" th:if="${#lists.isEmpty(recentPurchases)}">
+                            <p>No purchases yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Active Listings -->
+                <div>
+                    <div class="sub-header">
+                        <h3>My Active Listings</h3>
+                        <a href="#" onclick="showSection('listingSection'); return false;">Manage</a>
+                    </div>
+
+                    <div class="cards-row">
+                        <div class="art-card" th:each="a : ${activeListings}">
+                            <div class="art-image"
+                                 th:style="${a.artworkImageUrl != null} ? 'background-image:url(' + ${a.artworkImageUrl} + ');' : ''">
+                            </div>
+
+                            <div class="art-body">
+                                <div class="art-title" th:text="${a.artworkTitle}">Artwork Title</div>
+
+                                <div class="art-meta"
+                                     th:text="${a.currentBid != null} ? 'Current Highest Bid: ₹ ' + ${a.currentBid} : 'Waiting for bids'">
+                                    Waiting for bids
+                                </div>
+
+                                <div class="art-footer">
+                                    <span class="status-badge" th:text="${a.status}">LIVE</span>
+                                    <a th:href="@{/auction/{id}(id=${a.id})}">View</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="placeholder-box" th:if="${#lists.isEmpty(activeListings)}">
+                            <p>No active listings.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- WALLET SECTION -->
+            <section id="walletSection" class="content-section">
+                <div class="wallet-page">
+
+                    <div class="wallet-header">
+                        <div>
+                            <h1>My Wallet</h1>
+                            <p>Manage your AuctionCoins and transaction history</p>
+                        </div>
+                    </div>
+
+                    <div class="wallet-balance-banner">
+                        <div class="wallet-balance-left">
+                            <p class="wallet-label">AVAILABLE BALANCE</p>
+                            <h2>
+                                <span th:text="${wallet.balance}">0.00</span> <small>AC</small>
+                            </h2>
+                        </div>
+
+                        <div class="wallet-balance-right">
+                            <div class="wallet-summary-box">
+                                <div class="summary-item">
+                                    <p>TOTAL ADDED</p>
+                                    <h3><span th:text="${totalAdded}">0.00</span> AC</h3>
+                                </div>
+
+                                <div class="summary-divider"></div>
+
+                                <div class="summary-item">
+                                    <p>TOTAL SPENT</p>
+                                    <h3><span th:text="${totalSpent}">0.00</span> AC</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wallet-middle-grid">
+                        <div class="wallet-card add-money-card">
+                            <h3>Add Money</h3>
+                            <p>Convert INR to AuctionCoins instantly.</p>
+
+                            <form class="wallet-form" th:action="@{/wallet/deposit}" method="post">
+                                <div class="amount-input-box">
+                                    <span class="currency-icon">₹</span>
+                                    <input type="number" name="amount" min="1" step="1" value="5000" placeholder="Enter amount">
+                                </div>
+
+                                <div class="conversion-note">
+                                    Conversion Note: 1 INR = 1 AuctionCoin. No hidden processing fees.
+                                </div>
+
+                                <button type="submit" class="deposit-btn">DEPOSIT MONEY</button>
+                            </form>
+                        </div>
+
+                        <div class="wallet-side-column">
+                            <div class="wallet-card order-summary-card">
+                                <h3>Order Summary</h3>
+                                <div class="summary-row">
+                                    <span>Deposit Amount</span>
+                                    <strong>(auto)</strong>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Gateway Charges</span>
+                                    <strong class="free-text">FREE</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wallet-history-block">
+                        <div class="history-heading">
+                            <h2>Transaction History</h2>
+                            <p>A detailed log of all your wallet activities</p>
+                        </div>
+
+                        <div class="history-list">
+                            <div class="history-item" th:each="t : ${walletTxns}">
+                                <div class="history-left">
+                                    <div class="history-icon" th:classappend="${t.type == 'DEPOSIT'} ? ' credit' : ' debit'">
+                                        <span th:text="${t.type == 'DEPOSIT'} ? '↙' : '↗'">↙</span>
+                                    </div>
+
+                                    <div class="history-info">
+                                        <h4 th:text="${t.description}">Wallet Top-up</h4>
+                                        <p th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy - hh:mm a')}">date</p>
+                                    </div>
+                                </div>
+
+                                <div class="history-right">
+                                    <h4 th:class="${t.type == 'DEPOSIT'} ? 'credit-text' : 'debit-text'"
+                                        th:text="${t.type == 'DEPOSIT'} ? '+ ' + t.amount + ' AC' : '- ' + t.amount + ' AC'">
+                                        +0 AC
+                                    </h4>
+                                    <span class="txn-status"
+                                          th:classappend="${t.status == 'COMPLETED'} ? ' completed' : ' pending'"
+                                          th:text="${t.status}">
+              COMPLETED
+            </span>
+                                </div>
+                            </div>
+
+                            <div class="empty-history" th:if="${#lists.isEmpty(walletTxns)}">
+                                No transactions yet.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        <section id="resultSection" class="content-section">
+            <div class="result-hero">
+                <div>
+                    <div class="result-pill">
+                        <span th:text="${pendingResultsCount}">0</span> PENDING PAYMENTS
+                    </div>
+                    <h2 class="result-title">Result</h2>
+                    <p class="result-subtitle">
+                        Track your won auctions, complete payment within 24 hours, and view paid artwork details.
+                    </p>
+                </div>
+            </div>
+
+            <div class="result-grid">
+                <div class="result-card" th:each="a : ${resultAuctions}">
+                    <div class="result-image"
+                         th:style="${a.artworkImageUrl != null} ? 'background-image:url(' + ${a.artworkImageUrl} + '); background-size:cover; background-position:center;' : ''">
+                        <span class="result-win-badge">Won</span>
+                    </div>
+
+                    <div class="result-body">
+                        <div class="result-card-title" th:text="${a.artworkTitle}">Artwork</div>
+                        <div class="result-card-artist" th:text="'by ' + ${a.artistName}">by Artist</div>
+
+                        <div class="result-meta-row">
+                            <div>
+                                <small>Winning Bid</small>
+                                <strong th:text="'₹ ' + ${a.currentBid}">₹ 0</strong>
+                            </div>
+                            <div>
+                                <small>Ended On</small>
+                                <strong th:text="${#temporals.format(a.endTime, 'dd MMM yyyy')}">02 Apr 2026</strong>
+                            </div>
+                        </div>
+
+                        <div class="result-status-line">
+                    <span class="result-status-badge"
+                          th:classappend="${a.resultStatus == 'PAID'} ? ' paid' : (${a.resultStatus == 'EXPIRED'} ? ' expired' : ' pending')"
+                          th:text="${a.resultStatus}">
+                        PAYMENT_PENDING
+                    </span>
+                        </div>
+
+                        <div class="result-desc"
+                             th:if="${a.resultStatus == 'PAYMENT_PENDING'}">
+                            Complete payment before the 24-hour window ends.
+                        </div>
+
+                        <div class="result-desc"
+                             th:if="${a.resultStatus == 'EXPIRED'}">
+                            Payment window has closed. This auction is no longer available.
+                        </div>
+
+                        <div class="result-desc"
+                             th:if="${a.resultStatus == 'PAID'}">
+                            Payment completed successfully. View your artwork details.
+                        </div>
+
+                        <a class="result-action-btn"
+                           th:if="${a.resultStatus == 'PAYMENT_PENDING'}"
+                           th:href="@{/account(section='checkout', checkoutAuctionId=${a.id})}">
+                            Proceed to Checkout
+                        </a>
+
+                        <button class="result-action-btn disabled"
+                                th:if="${a.resultStatus == 'EXPIRED'}"
+                                type="button" disabled>
+                            Auction Expired
+                        </button>
+
+                        <button class="result-action-btn secondary"
+                                th:if="${a.resultStatus == 'PAID'}"
+                                type="button"
+                                th:attr="data-title=${a.artworkTitle},
+                                 data-artist=${a.artistName},
+                                 data-image=${a.artworkImageUrl},
+                                 data-price=${a.currentBid},
+                                 data-description=${a.artworkDescription},
+                                 data-technique=${a.technique},
+                                 data-year=${a.yearMade},
+                                 data-size=${a.sizeDimension},
+                                 data-orientation=${a.orientation}"
+                                onclick="openResultDetailModal(this)">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+
+                <div class="empty-history" th:if="${#lists.isEmpty(resultAuctions)}">
+                    No won auctions yet.
+                </div>
+            </div>
+        </section>
+        <section id="checkoutSection" class="content-section">
+            <div class="checkout-page" th:if="${checkoutAuction != null}">
+                <div class="checkout-topbar">
+                    <a href="#" onclick="showSection('resultSection'); return false;" class="checkout-back-link">← Back to Result</a>
+                    <div class="checkout-order-id">
+                        Order for Auction #
+                        <span th:text="${checkoutAuction.id}">1</span>
+                    </div>
+                </div>
+
+                <div class="checkout-grid">
+                    <div class="checkout-left">
+                        <div class="checkout-art-image"
+                             th:style="${checkoutAuction.artworkImageUrl != null} ? 'background-image:url(' + ${checkoutAuction.artworkImageUrl} + '); background-size:cover; background-position:center;' : ''">
+                        </div>
+
+                        <h2 class="checkout-art-title" th:text="${checkoutAuction.artworkTitle}">Artwork</h2>
+                        <p class="checkout-art-artist" th:text="'by ' + ${checkoutAuction.artistName}">by Artist</p>
+                        <div class="checkout-winning-badge">
+                            Winning Bid:
+                            <strong th:text="'₹ ' + ${checkoutAuction.currentBid}">₹ 0</strong>
+                        </div>
+                    </div>
+
+                    <div class="checkout-right">
+                        <div class="checkout-card">
+                            <h3>Order Summary</h3>
+
+                            <div class="checkout-summary-row">
+                                <span>Winning Bid</span>
+                                <strong th:text="'₹ ' + ${checkoutAuction.currentBid}">₹ 0</strong>
+                            </div>
+
+                            <div class="checkout-summary-row">
+                                <span>Insured Shipping</span>
+                                <strong th:text="'₹ ' + ${checkoutAuction.shippingCharge}">₹ 0</strong>
+                            </div>
+
+                            <div class="checkout-summary-row">
+                                <span>Sales Tax</span>
+                                <strong th:text="'₹ ' + ${checkoutAuction.taxAmount}">₹ 0</strong>
+                            </div>
+
+                            <div class="checkout-summary-total">
+                                <span>Total Payable</span>
+                                <strong th:text="'₹ ' + ${checkoutAuction.totalPayable}">₹ 0</strong>
+                            </div>
+
+                            <div class="checkout-wallet-box">
+                                <h4>Payment Method</h4>
+                                <p>ArtVerse Wallet</p>
+                                <strong th:text="'Available: ' + ${wallet.balance} + ' AC'">Available: 0 AC</strong>
+                            </div>
+
+                            <div class="checkout-address-box">
+                                <div class="checkout-address-head">
+                                    <h4>Shipping Address</h4>
+                                    <button type="button" class="edit-address-btn" th:if="${shippingAddress != null}">
+                                        Edit
+                                    </button>
+                                </div>
+
+                                <div th:if="${shippingAddress != null}" class="checkout-address-text">
+                                    <strong th:text="${shippingAddress.fullName}">Full Name</strong><br>
+                                    <span th:text="${shippingAddress.addressLine1}">Address 1</span><br>
+                                    <span th:if="${shippingAddress.addressLine2}" th:text="${shippingAddress.addressLine2}">Address 2</span><br th:if="${shippingAddress.addressLine2}">
+                                    <span th:text="${shippingAddress.city + ', ' + shippingAddress.state}">City, State</span><br>
+                                    <span th:text="${shippingAddress.postalCode + ', ' + shippingAddress.country}">Postal, Country</span><br>
+                                    <span th:text="${shippingAddress.phone}">Phone</span>
+                                </div>
+
+                                <div th:if="${shippingAddress == null}" class="checkout-address-empty">
+                                    Please fill your shipping address before making payment.
+                                </div>
+                            </div>
+
+                            <form th:action="@{/account/result/pay}" method="post">
+                                <input type="hidden" name="auctionId" th:value="${checkoutAuction.id}">
+                                <button type="submit"
+                                        class="checkout-pay-btn"
+                                        th:disabled="${shippingAddress == null or wallet.balance < checkoutAuction.totalPayable}">
+                                    Confirm &amp; Pay Securely
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="placeholder-box" th:if="${checkoutAuction == null}">
+                <h2>No checkout selected</h2>
+                <p>Please go to Result and choose an auction.</p>
+            </div>
+        </section>
+        <!--Shipping Section-->
+        <section id="shippingSection" class="content-section">
+            <div class="shipping-hero">
+                <div>
+                    <div class="shipping-pill">DELIVERY DETAILS</div>
+                    <h2 class="shipping-title">Shipping Address</h2>
+                    <p class="shipping-subtitle">
+                        Add or update the delivery address that will be used for your won auctions.
+                    </p>
+                </div>
+            </div>
+
+            <div th:if="${listingSuccess}" class="flash-success" th:text="${listingSuccess}"></div>
+            <div th:if="${listingError}" class="flash-error" th:text="${listingError}"></div>
+
+            <div class="shipping-layout">
+                <div class="shipping-card">
+                    <div class="shipping-card-head">
+                        <div>
+                            <h3>Address Form</h3>
+                            <p>Keep your shipping information accurate for smooth checkout.</p>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/account/shipping/save}" method="post" th:object="${shippingAddress}" class="shipping-form">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="shipping-form-grid two-col">
+                            <div class="shipping-form-group">
+                                <label>Full Name</label>
+                                <input type="text" th:field="*{fullName}" placeholder="Enter full name" autocomplete="name" required>
+                            </div>
+
+                            <div class="shipping-form-group">
+                                <label>Phone</label>
+                                <input type="text" th:field="*{phone}" placeholder="Enter phone number" maxlength="15" autocomplete="tel" required>
+                            </div>
+                        </div>
+
+                        <div class="shipping-form-group">
+                            <label>Address Line 1</label>
+                            <input type="text" th:field="*{addressLine1}" placeholder="House no, street, area" autocomplete="address-line1" required>
+                        </div>
+
+                        <div class="shipping-form-group">
+                            <label>Address Line 2</label>
+                            <input type="text" th:field="*{addressLine2}" placeholder="Apartment, landmark, optional" autocomplete="address-line2">
+                        </div>
+
+                        <div class="shipping-form-grid two-col">
+                            <div class="shipping-form-group">
+                                <label>City</label>
+                                <input type="text" th:field="*{city}" placeholder="Enter city" autocomplete="address-level2" required>
+                            </div>
+
+                            <div class="shipping-form-group">
+                                <label>State</label>
+                                <input type="text" th:field="*{state}" placeholder="Enter state" autocomplete="address-level1" required>
+                            </div>
+                        </div>
+
+                        <div class="shipping-form-grid two-col">
+                            <div class="shipping-form-group">
+                                <label>Postal Code</label>
+                                <input type="text" th:field="*{postalCode}" placeholder="Enter postal code" maxlength="10" autocomplete="postal-code" required>
+                            </div>
+
+                            <div class="shipping-form-group">
+                                <label>Country</label>
+                                <input type="text" th:field="*{country}" placeholder="Enter country" autocomplete="country-name" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="shipping-save-btn">Save Shipping Address</button>
+                    </form>
+                </div>
+
+                <div class="shipping-preview-card">
+                    <h3>Saved Address Preview</h3>
+                    <p class="shipping-preview-note">This address will be used during checkout.</p>
+
+                    <div class="shipping-preview-box"
+                         th:if="${shippingAddress != null and shippingAddress.fullName != null and !#strings.isEmpty(shippingAddress.fullName)}">
+                        <strong th:text="${shippingAddress.fullName}">Full Name</strong><br>
+                        <span th:text="${shippingAddress.addressLine1}">Address Line 1</span><br>
+                        <span th:if="${shippingAddress.addressLine2 != null and !#strings.isEmpty(shippingAddress.addressLine2)}"
+                              th:text="${shippingAddress.addressLine2}">Address Line 2</span>
+                        <br th:if="${shippingAddress.addressLine2 != null and !#strings.isEmpty(shippingAddress.addressLine2)}">
+                        <span th:text="${shippingAddress.city + ', ' + shippingAddress.state}">City, State</span><br>
+                        <span th:text="${shippingAddress.postalCode + ', ' + shippingAddress.country}">Postal Code, Country</span><br>
+                        <span th:text="${shippingAddress.phone}">Phone</span>
+                    </div>
+
+                    <div class="shipping-empty-box"
+                         th:if="${shippingAddress == null or shippingAddress.fullName == null or #strings.isEmpty(shippingAddress.fullName)}">
+                        No shipping address saved yet.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COLLECTION SECTION -->
+        <section id="collectionSection" class="content-section">
+
+            <div class="collection-hero">
+                <div>
+                    <div class="collection-pill">
+                        <span id="collectionOwnedCount" th:text="${#lists.size(myCollection)}">0</span> OWNED
+                    </div>
+                    <h2 class="collection-title">My Collection</h2>
+                    <p class="collection-subtitle">
+                        A private vault of premium artworks you’ve acquired across the ArtVerse ecosystem.
+                    </p>
+                </div>
+            </div>
+
+            <!-- toolbar -->
+            <div class="collection-toolbar">
+
+                <!-- categories from DB -->
+                <div class="collection-tabs" id="collectionTabs">
+                    <button type="button" class="collection-tab active" data-category="">All</button>
+
+                    <button type="button"
+                            class="collection-tab"
+                            th:each="cat : ${collectionCategories}"
+                            th:text="${cat}"
+                            th:attr="data-category=${cat}">
+                        Category
+                    </button>
+                </div>
+
+                <div class="collection-actions">
+                    <div class="collection-search-wrap">
+                        <input id="collectionSearch" type="text" placeholder="Search collection..." />
+                    </div>
+
+                    <select id="collectionSort">
+                        <option value="latest">Sort By: Latest</option>
+                        <option value="title">Title (A-Z)</option>
+                        <option value="priceHigh">Price: High → Low</option>
+                        <option value="priceLow">Price: Low → High</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- cards -->
+            <div class="collection-grid" id="collectionGrid">
+                <div class="collection-card"
+                     th:each="item : ${myCollection}">
+
+                    <div class="collection-image"
+                         th:style="${item.artwork.imageUrl != null} ? 'background-image:url(' + ${item.artwork.imageUrl} + ');' : ''">
+                        <span class="owned-badge">Owned</span>
+                    </div>
+
+                    <div class="collection-body">
+                        <div class="collection-card-title" th:text="${item.artwork.title}">Artwork Title</div>
+                        <div class="collection-card-artist" th:text="'by ' + ${item.artwork.artistName}">by Artist</div>
+
+                        <div class="collection-meta">
+                            <div>
+                                <small>Acquisition</small>
+                                <strong th:text="${item.pricePaid != null} ? '₹ ' + ${item.pricePaid} : '—'">₹ 0</strong>
+                            </div>
+                            <div>
+                                <small>Method</small>
+                                <strong th:text="${item.acquisitionType != null ? item.acquisitionType : 'OWNED'}">OWNED</strong>
+                            </div>
+                        </div>
+
+                        <a class="collection-view-btn"
+                           th:href="@{/artworks}">
+                            View
+                        </a>
+                    </div>
+                </div>
+
+                <div class="empty-history" th:if="${#lists.isEmpty(myCollection)}">
+                    No artworks in your collection yet.
+                </div>
+            </div>
+        </section>
+        <!-- Listing Section -->
+
+        <!-- LISTING SECTION -->
+        <section id="listingSection" class="content-section">
+            <div class="listing-hero">
+                <div>
+                    <div class="listing-pill">
+                        <span th:text="${#lists.size(myListings)}">0</span> ACTIVE
+                    </div>
+                    <h2 class="listing-title">My Listings</h2>
+                    <p class="listing-subtitle">
+                        Manage and track your auction listings and sales performance.
+                    </p>
+                </div>
+
+                <button type="button" class="listing-create-top-btn"
+                        onclick="document.getElementById('createListingForm').scrollIntoView({behavior:'smooth'})">
+                    + Create Listing
+                </button>
+            </div>
+
+            <div th:if="${listingSuccess}" class="flash-success" th:text="${listingSuccess}"></div>
+            <div th:if="${listingError}" class="flash-error" th:text="${listingError}"></div>
+
+            <div class="listing-toolbar">
+                <div class="listing-tabs" id="listingTabs">
+                    <button type="button" class="listing-tab active" data-status="">All</button>
+                    <button type="button" class="listing-tab" data-status="LIVE">Live</button>
+                    <button type="button" class="listing-tab" data-status="UPCOMING">Upcoming</button>
+                    <button type="button" class="listing-tab" data-status="ENDED">Ended</button>
+                </div>
+
+                <div class="listing-actions">
+                    <input type="text" id="listingSearch" placeholder="Search listings..." />
+                </div>
+            </div>
+
+            <div class="listing-grid" id="listingGrid">
+                <div class="listing-card"
+                     th:each="a : ${myListings}"
+                     th:attr="data-status=${a.status},data-title=${a.artworkTitle}">
+
+                    <div class="listing-image"
+                         th:style="${a.artworkImageUrl != null} ? 'background-image:url(' + ${a.artworkImageUrl} + '); background-size:cover; background-position:center;' : ''">
+                        <span class="listing-status-badge" th:text="${a.status}">LIVE</span>
+                    </div>
+
+                    <div class="listing-body">
+                        <div class="listing-card-title" th:text="${a.artworkTitle}">Artwork</div>
+                        <div class="listing-card-artist" th:text="${a.artistName}">Artist</div>
+
+                        <div class="listing-stats-row">
+                            <div>
+                                <small>Current Bid</small>
+                                <strong th:text="'₹ ' + ${a.currentBid}">₹ 0</strong>
+                            </div>
+                            <div>
+                                <small>Total Bids</small>
+                                <strong th:text="${a.totalBids}">0</strong>
+                            </div>
+                        </div>
+
+                        <div class="listing-meta-line"
+                             th:if="${a.status == 'LIVE'}"
+                             th:text="'Ends: ' + ${#temporals.format(a.endTime, 'dd MMM yyyy')}">
+                            Ends: 25 Mar 2026
+                        </div>
+
+                        <div class="listing-meta-line"
+                             th:if="${a.status == 'UPCOMING'}"
+                             th:text="'Starts: ' + ${#temporals.format(a.startTime, 'dd MMM yyyy')}">
+                            Starts: 25 Mar 2026
+                        </div>
+
+                        <div class="listing-meta-line"
+                             th:if="${a.status == 'ENDED'}"
+                             th:text="'Ended: ' + ${#temporals.format(a.endTime, 'dd MMM yyyy')}">
+                            Ended: 25 Mar 2026
+                        </div>
+
+                        <a class="listing-view-btn" th:href="@{/auction/{id}(id=${a.id})}">View</a>
+                    </div>
+                </div>
+
+                <div class="empty-history" th:if="${#lists.isEmpty(myListings)}">
+                    No listings created yet.
+                </div>
+            </div>
+
+            <div class="create-listing-panel" id="createListingForm">
+                <div class="create-listing-head">
+                    <div>
+                        <h2>Create New Listing</h2>
+                        <p>Draft your next masterpiece for the world to see.</p>
+                    </div>
+                </div>
+
+                <form th:action="@{/account/listings/create}" method="post" th:object="${listingForm}" class="create-listing-form">
+                    <div class="create-listing-left">
+                        <div class="listing-form-card">
+                            <h3>Artwork Information</h3>
+                            <p>Tell us about the piece you're listing.</p>
+
+                            <div class="listing-form-grid two-col">
+                                <div class="listing-form-group">
+                                    <label>Title</label>
+                                    <input type="text" th:field="*{title}" placeholder="Enter artwork title" required>
+                                </div>
+
+                                <div class="listing-form-group">
+                                    <label>Artist Name</label>
+                                    <input type="text" th:field="*{artistName}" placeholder="Enter artist name" required>
+                                </div>
+                            </div>
+
+                            <div class="listing-form-grid two-col">
+                                <div class="listing-form-group">
+                                    <label>Category</label>
+                                    <input type="text" th:field="*{category}" placeholder="e.g. Oil Painting, Digital Art" required>
+                                </div>
+
+                                <div class="listing-form-group">
+                                    <label>Technique</label>
+                                    <input type="text" th:field="*{technique}" placeholder="e.g. Oil on Canvas">
+                                </div>
+                            </div>
+
+                            <div class="listing-form-grid two-col">
+                                <div class="listing-form-group">
+                                    <label>Year Made</label>
+                                    <input type="number" th:field="*{yearMade}" placeholder="e.g. 1889">
+                                </div>
+
+                                <div class="listing-form-group">
+                                    <label>Orientation</label>
+                                    <input type="text" th:field="*{orientation}" placeholder="e.g. Landscape">
+                                </div>
+                            </div>
+
+                            <div class="listing-form-group">
+                                <label>Size Dimension</label>
+                                <input type="text" th:field="*{sizeDimension}" placeholder="e.g. 182 x 320 cm">
+                            </div>
+
+                            <div class="listing-form-group">
+                                <label>Image URL</label>
+                                <input type="text" th:field="*{imageUrl}" placeholder="Paste artwork image URL" required>
+                            </div>
+
+                            <div class="listing-form-group">
+                                <label>Description</label>
+                                <textarea th:field="*{description}" rows="6"
+                                          placeholder="Share the story behind this creation..." required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="create-listing-right">
+                        <div class="listing-form-card auction-setup-card">
+                            <h3>Auction Setup</h3>
+                            <p>Define your price and duration.</p>
+
+                            <div class="listing-form-grid two-col">
+                                <div class="listing-form-group">
+                                    <label>Starting Bid (₹)</label>
+                                    <input type="number" step="0.01" th:field="*{startingBid}" placeholder="Enter starting bid" required>
+                                </div>
+
+                                <div class="listing-form-group">
+                                    <label>Bid Increment (₹)</label>
+                                    <input type="number" step="0.01" th:field="*{bidIncrement}" placeholder="Enter bid increment" required>
+                                </div>
+                            </div>
+
+                            <div class="listing-form-group">
+                                <label>Reserve Price (₹)</label>
+                                <input type="number" step="0.01" th:field="*{reservePrice}" placeholder="Enter reserve price">
+                            </div>
+
+                            <div class="listing-form-grid two-col">
+                                <div class="listing-form-group">
+                                    <label>Start Date</label>
+                                    <input type="date" th:field="*{startDate}" required>
+                                </div>
+
+                                <div class="listing-form-group">
+                                    <label>Duration (Days)</label>
+                                    <input type="number" th:field="*{durationDays}" placeholder="e.g. 7" min="1" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="publish-listing-btn">Publish Listing</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section></main></div>
+<footer class="main-footer">
+    <div class="footer-content">
+        <p>© 2026 ArtVerse. All rights reserved.</p>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+        </div>
+    </div>
+</footer>
+<div id="depositSuccessModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:9999;">
+    <div style="max-width:420px; margin:120px auto; background:#fff; border-radius:18px; padding:22px 20px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <h3 style="margin-bottom:8px;">Money added successfully</h3>
+        <p style="color:#666; margin-bottom:16px;">Your wallet balance has been updated.</p>
+        <button type="button"
+                onclick="closeDepositModal()"
+                style="border:none; background:#f28e72; color:#fff; padding:10px 14px; border-radius:12px; cursor:pointer; width:100%;">
+            OK
+        </button>
+    </div>
+</div>
+        <script>
+            function showSection(sectionId, clickedButton = null) {
+                const sections = document.querySelectorAll('.content-section');
+                sections.forEach(section => section.classList.remove('active'));
+
+                const target = document.getElementById(sectionId);
+                if (target) target.classList.add('active');
+
+                const buttons = document.querySelectorAll('.nav-btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+
+                if (clickedButton) {
+                    clickedButton.classList.add('active');
+                } else {
+                    const map = {
+                        profileSection: 0,
+                        walletSection: 1,
+                        resultSection: 2,
+                        collectionSection: 3,
+                        listingSection: 4,
+                        checkoutSection: 2
+                    };
+
+                    const index = map[sectionId];
+                    if (index !== undefined && buttons[index]) {
+                        buttons[index].classList.add('active');
+                    }
+                }
+            }
+
+            function openResultDetailModal(button) {
+                document.getElementById('resultDetailTitle').textContent = button.dataset.title || 'Artwork';
+                document.getElementById('resultDetailArtist').textContent = 'by ' + (button.dataset.artist || 'Unknown');
+                document.getElementById('resultDetailPrice').textContent = '₹ ' + (button.dataset.price || '0');
+                document.getElementById('resultDetailDescription').textContent = button.dataset.description || 'No description available.';
+                document.getElementById('resultDetailTechnique').textContent = button.dataset.technique || '—';
+                document.getElementById('resultDetailYear').textContent = button.dataset.year || '—';
+                document.getElementById('resultDetailSize').textContent = button.dataset.size || '—';
+                document.getElementById('resultDetailOrientation').textContent = button.dataset.orientation || '—';
+
+                const imageBox = document.getElementById('resultDetailImage');
+                imageBox.style.backgroundImage = button.dataset.image ? `url('${button.dataset.image}')` : 'none';
+
+                document.getElementById('resultDetailModal').classList.add('show');
+            }
+
+            function closeResultDetailModal() {
+                document.getElementById('resultDetailModal').classList.remove('show');
+            }
+        </script>
+<script>
+    (function () {
+      const grid = document.getElementById("collectionGrid");
+      const searchInput = document.getElementById("collectionSearch");
+      const sortSelect = document.getElementById("collectionSort");
+      const tabs = document.getElementById("collectionTabs");
+      const countEl = document.getElementById("collectionOwnedCount");
+
+      if (!grid || !searchInput || !sortSelect || !tabs) return;
+
+      let state = { category: "", q: "", sort: "latest" };
+      let debounceTimer = null;
+
+      function formatINR(value) {
+        if (value === null || value === undefined || value === "") return "—";
+        const n = Number(value);
+        if (Number.isNaN(n)) return "—";
+        return "₹ " + n.toFixed(2);
+      }
+
+      function render(items) {
+        grid.innerHTML = "";
+
+        if (!items || items.length === 0) {
+          grid.innerHTML = `<div class="empty-history">No artworks in your collection yet.</div>`;
+          if (countEl) countEl.textContent = "0";
+          return;
+        }
+
+        if (countEl) countEl.textContent = String(items.length);
+
+        items.forEach(it => {
+          const card = document.createElement("div");
+          card.className = "collection-card";
+
+          const imageStyle = it.imageUrl ? `style="background-image:url('${it.imageUrl}');"` : "";
+
+          card.innerHTML = `
+            <div class="collection-image" ${imageStyle}>
+              <span class="owned-badge">Owned</span>
+            </div>
+            <div class="collection-body">
+              <div class="collection-card-title">${it.title || "Untitled"}</div>
+              <div class="collection-card-artist">by ${it.artistName || "Unknown"}</div>
+
+              <div class="collection-meta">
+                <div>
+                  <small>Acquisition</small>
+                  <strong>${formatINR(it.pricePaid)}</strong>
+                </div>
+                <div>
+                  <small>Method</small>
+                  <strong>${it.acquisitionType || "OWNED"}</strong>
+                </div>
+              </div>
+
+              <a class="collection-view-btn" href="/artworks">View</a>
+            </div>
+          `;
+
+          grid.appendChild(card);
+        });
+      }
+
+      async function load() {
+        const params = new URLSearchParams();
+        if (state.category) params.set("category", state.category);
+        if (state.q) params.set("q", state.q);
+        if (state.sort) params.set("sort", state.sort);
+
+        const res = await fetch("/api/my-collection?" + params.toString());
+        if (!res.ok) return;
+
+        const data = await res.json();
+        render(data.items || []);
+      }
+
+      // tabs click
+      tabs.addEventListener("click", (e) => {
+        const btn = e.target.closest(".collection-tab");
+        if (!btn) return;
+
+        document.querySelectorAll(".collection-tab").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        state.category = btn.dataset.category || "";
+        load();
+      });
+
+      // search with debounce
+      searchInput.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          state.q = searchInput.value.trim();
+          load();
+        }, 350);
+      });
+
+      // sort change
+      sortSelect.addEventListener("change", () => {
+        state.sort = sortSelect.value;
+        load();
+      });
+    })();
+</script>
+        <script th:inline="javascript">
+            document.addEventListener("DOMContentLoaded", function () {
+                const section = [[${activeSection}]];
+
+                if (section === "collection") {
+                    showSection("collectionSection");
+                } else if (section === "wallet") {
+                    showSection("walletSection");
+                } else if (section === "listings") {
+                    showSection("listingSection");
+                } else if (section === "result") {
+                    showSection("resultSection");
+                } else if (section === "checkout") {
+                    showSection("checkoutSection");
+                } else {
+                    showSection("profileSection");
+                }
+            });
+        </script>
+
+        <script>
+            (function () {
+              const grid = document.getElementById("listingGrid");
+              const searchInput = document.getElementById("listingSearch");
+              const tabs = document.getElementById("listingTabs");
+
+              if (!grid || !searchInput || !tabs) return;
+
+              let state = { status: "", q: "" };
+
+              function applyFilter() {
+                const cards = grid.querySelectorAll(".listing-card");
+
+                cards.forEach(card => {
+                  const title = (card.dataset.title || "").toLowerCase();
+                  const status = (card.dataset.status || "").toUpperCase();
+
+                  const matchesStatus = !state.status || status === state.status;
+                  const matchesSearch = !state.q || title.includes(state.q);
+
+                  card.style.display = (matchesStatus && matchesSearch) ? "" : "none";
+                });
+              }
+
+              tabs.addEventListener("click", (e) => {
+                const btn = e.target.closest(".listing-tab");
+                if (!btn) return;
+
+                tabs.querySelectorAll(".listing-tab").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+
+                state.status = btn.dataset.status || "";
+                applyFilter();
+              });
+
+              searchInput.addEventListener("input", () => {
+                state.q = searchInput.value.trim().toLowerCase();
+                applyFilter();
+              });
+            })();
+        </script>
+
+        <div id="resultDetailModal" class="result-detail-modal">
+            <div class="result-detail-box">
+                <button type="button" class="result-detail-close" onclick="closeResultDetailModal()">×</button>
+
+                <div class="result-detail-grid">
+                    <div class="result-detail-image" id="resultDetailImage"></div>
+
+                    <div class="result-detail-content">
+                        <h2 id="resultDetailTitle">Artwork Title</h2>
+                        <p id="resultDetailArtist">by Artist</p>
+
+                        <div class="result-detail-price-box">
+                            <small>Winning Price</small>
+                            <strong id="resultDetailPrice">₹ 0</strong>
+                        </div>
+
+                        <div class="result-detail-card">
+                            <h3>About this Artwork</h3>
+                            <ul>
+                                <li><strong>Technique:</strong> <span id="resultDetailTechnique">—</span></li>
+                                <li><strong>Year Made:</strong> <span id="resultDetailYear">—</span></li>
+                                <li><strong>Size Dimension:</strong> <span id="resultDetailSize">—</span></li>
+                                <li><strong>Orientation:</strong> <span id="resultDetailOrientation">—</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="result-detail-card">
+                            <h3>The Artwork Story</h3>
+                            <p id="resultDetailDescription">Description</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
+</html>

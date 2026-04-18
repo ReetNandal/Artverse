@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${auction.title} + ' | ArtVerse'">Bid Now</title>
+    <link rel="stylesheet" href="/css/artverse.css">
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo-wrap">
+        <div class="logo-icon">🎨</div>
+        <div class="logo-text">
+            <div class="logo-title">ARTVERSE</div>
+            <div class="logo-tagline">CURATING THE FUTURE</div>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <a href="/artworks">Gallery</a>
+        <a href="/auctions" class="active">Auctions</a>
+        <a href="/collections">My Collections</a>
+        <a href="#">Artists</a>
+    </nav>
+
+    <a class="btn-primary" href="/logout">Logout</a>
+</header>
+
+<section class="auction-detail-page">
+    <div class="auction-detail-grid">
+
+        <!-- LEFT IMAGE -->
+        <div class="detail-left">
+            <div class="detail-image-card">
+                <img class="detail-main-image"
+                     th:src="${auction.artworkImageUrl}"
+                     alt="Artwork">
+            </div>
+        </div>
+
+        <!-- CENTER CONTENT -->
+        <div class="detail-center">
+            <div class="detail-badges">
+                <span class="detail-pill" th:text="${auction.artworkCategory}">Category</span>
+                <span class="detail-pill soft" th:text="${auction.status}">LIVE</span>
+            </div>
+
+            <h1 class="detail-title" th:text="${auction.title}">Artwork Title</h1>
+
+            <p class="detail-artist">
+                by <span th:text="${auction.artistName}">Artist</span>
+            </p>
+
+            <p class="detail-description" th:text="${auction.description}">Artwork description</p>
+
+            <!-- PRICE PANEL -->
+            <div class="detail-price-panel">
+                <div>
+                    <div class="detail-label">Current Bid</div>
+                    <div id="currentBidValue" class="detail-price" th:text="'₹' + ${auction.currentBid}">₹0</div>
+                </div>
+
+                <div>
+                    <div class="detail-label">Starting Price</div>
+                    <div class="detail-side-value" th:text="'₹' + ${auction.basePrice}">₹0</div>
+                </div>
+
+                <div>
+                    <div class="detail-label">Bid Increment</div>
+                    <div id="bidIncrementValue" class="detail-side-value" th:text="${auction.bidIncrement}">0</div>
+                </div>
+
+                <div>
+                    <div class="detail-label">Total Bids</div>
+                    <div id="totalBidsValue" class="detail-side-value" th:text="${auction.totalBids}">0</div>
+                </div>
+            </div>
+
+            <!-- ABOUT ARTWORK -->
+            <div class="detail-info-card">
+                <h3>About this Artwork</h3>
+                <ul class="detail-info-list">
+                    <li><strong>Technique:</strong> <span th:text="${auction.technique}">Oil on Canvas</span></li>
+                    <li><strong>Year Made:</strong> <span th:text="${auction.yearMade}">1937</span></li>
+                    <li><strong>Size Dimension:</strong> <span th:text="${auction.sizeDimension}">24 x 36 inches</span></li>
+                    <li><strong>Orientation:</strong> <span th:text="${auction.orientation}">Portrait</span></li>
+                </ul>
+            </div>
+
+            <!-- STORY -->
+            <div class="detail-story-card">
+                <h3>The Artwork Story</h3>
+                <p th:text="${auction.artworkDescription}">Artwork Story</p>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="detail-right">
+
+            <!-- COUNTDOWN + BID -->
+            <div class="bid-panel">
+                <div class="detail-label">Ends In</div>
+
+                <div class="bid-countdown countdown"
+                     th:attr="data-end=${#temporals.format(auction.endTime,'yyyy-MM-dd HH:mm:ss')}">
+                    00:00:00
+                </div>
+                <div class="wallet-mini-card" th:if="${wallet != null}">
+                    <div class="detail-label">Wallet</div>
+                    <div class="wallet-mini-row">
+                        <span>Total Balance</span>
+                        <strong th:text="'₹' + ${wallet.balance}">₹0</strong>
+                    </div>
+                    <div class="wallet-mini-row">
+                        <span>Held Amount</span>
+                        <strong th:text="'₹' + ${wallet.heldBalance}">₹0</strong>
+                    </div>
+                    <div class="wallet-mini-row">
+                        <span>Available Balance</span>
+                        <strong id="availableBalanceValue" th:text="'₹' + ${availableBalance}">₹0</strong>
+                    </div>
+                </div>
+
+                <!-- ✅ AJAX form: no redirect -->
+                <form id="bidForm" th:action="@{/api/bids}" method="post" class="bid-form">
+                    <input type="hidden" name="auctionId" th:value="${auction.id}">
+
+                    <label>Your Bid</label>
+
+                    <input id="bidAmount"
+                           type="number"
+                           step="0.01"
+                           name="amount"
+                           th:attr="min=${auction.currentBid + auction.bidIncrement}"
+                           th:value="${auction.currentBid + auction.bidIncrement}">
+
+                    <button type="submit" class="btn-secondary">Place Bid Now</button>
+                </form>
+                <div id="bidErrorMessage" class="bid-error-message" style="display:none;"></div>
+            </div>
+
+            <!-- LIVE ACTIVITY -->
+            <div class="activity-panel">
+                <h3>Live Activity</h3>
+
+                <!-- ✅ Render initial DB activity (Thymeleaf) -->
+                <div class="activity-list" id="activityList">
+                    <div class="activity-item" th:each="bid : ${recentBids}">
+                        <div>
+                            <div class="activity-user" th:text="${bid.user.username}">User</div>
+                            <div class="activity-time"
+                                 th:text="${#temporals.format(bid.bidTime,'dd MMM HH:mm')}">
+                                time
+                            </div>
+                        </div>
+
+                        <div class="activity-amount" th:text="'₹' + ${bid.amount}">₹0</div>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(recentBids)}" style="color:#777; padding:10px 6px;">
+                        No bids yet.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- ✅ Bid success modal -->
+<div id="bidSuccessModal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:9999;">
+    <div style="max-width:420px; margin:120px auto; background:#fff; border-radius:18px; padding:22px 20px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <h3 style="margin-bottom:8px;">Bid placed successfully</h3>
+        <p id="bidSuccessText" style="color:#666; margin-bottom:16px;">Your bid was recorded.</p>
+        <button type="button"
+                onclick="document.getElementById('bidSuccessModal').style.display='none'"
+                style="border:none; background:#f28e72; color:#fff; padding:10px 14px; border-radius:12px; cursor:pointer; width:100%;">
+            OK
+        </button>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="footer-top">
+        <div class="footer-brand">
+            <div class="footer-logo">🎨 ARTVERSE</div>
+            <p>
+                The global standard for premium digital & physical art.
+                Discover, collect, and trade the world's most sought-after masterpieces.
+            </p>
+        </div>
+
+        <div class="footer-links">
+            <div>
+                <h4>PLATFORM</h4>
+                <a href="#">Gallery</a>
+                <a href="#">Auctions</a>
+                <a href="#">Collections</a>
+                <a href="#">Artists</a>
+            </div>
+
+            <div>
+                <h4>COMPANY</h4>
+                <a href="#">About Us</a>
+                <a href="#">Careers</a>
+                <a href="#">Press Kit</a>
+                <a href="#">Contact</a>
+            </div>
+
+            <div>
+                <h4>LEGAL</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Auction Terms</a>
+                <a href="#">Seller Agreement</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <span>© 2024 ArtVerse Inc. All rights reserved.</span>
+        <div class="socials">
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+            <a href="#">Discord</a>
+        </div>
+    </div>
+</footer>
+<script>
+    function startCountdowns() {
+        const elements = document.querySelectorAll(".countdown");
+
+        function update() {
+            elements.forEach(el => {
+                const end = el.getAttribute("data-end");
+                const endTime = new Date(end.replace(" ", "T"));
+                const now = new Date();
+                const diff = endTime - now;
+
+                if (diff <= 0) {
+                    el.textContent = "Ended";
+                    return;
+                }
+
+                const seconds = Math.floor(diff / 1000);
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const sec = seconds % 60;
+
+                const pad = n => String(n).padStart(2, "0");
+                el.textContent = `${pad(hours)}:${pad(minutes)}:${pad(sec)}`;
+            });
+        }
+
+        update();
+        setInterval(update, 1000);
+    }
+
+    function formatINR(amount) {
+        const n = Number(amount);
+        if (Number.isNaN(n)) return "₹0.00";
+        return "₹" + n.toFixed(2);
+    }
+
+    function renderRecentBids(recentBids) {
+        const list = document.getElementById("activityList");
+        if (!list) return;
+
+        list.innerHTML = "";
+
+        if (!recentBids || recentBids.length === 0) {
+            list.innerHTML = `<div style="color:#777; padding:10px 6px;">No bids yet.</div>`;
+            return;
+        }
+
+        recentBids.forEach(b => {
+            const row = document.createElement("div");
+            row.className = "activity-item";
+
+            const prettyTime = (b.bidTime || "").replace("T", " ").substring(0, 16);
+
+            row.innerHTML = `
+              <div>
+                <div class="activity-user">${b.username || "User"}</div>
+                <div class="activity-time">${prettyTime}</div>
+              </div>
+              <div class="activity-amount">${formatINR(b.amount)}</div>
+            `;
+
+            list.appendChild(row);
+        });
+    }
+
+    async function refreshRecentBids(auctionId) {
+        const res = await fetch(`/api/auctions/${auctionId}/bids/recent`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        renderRecentBids(data.recentBids || []);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        startCountdowns();
+
+        const form = document.getElementById("bidForm");
+        if (!form) return;
+
+        const auctionId = form.querySelector('input[name="auctionId"]').value;
+        const errorBox = document.getElementById("bidErrorMessage");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            if (errorBox) {
+                errorBox.style.display = "none";
+                errorBox.textContent = "";
+            }
+
+            const formData = new FormData(form);
+            const amountPlaced = formData.get("amount");
+
+            const res = await fetch(form.getAttribute("action"), {
+                method: "POST",
+                body: formData
+            });
+
+            let data = {};
+            try {
+                data = await res.json();
+            } catch (err) {}
+
+            if (!res.ok) {
+                if (errorBox) {
+                    errorBox.style.display = "block";
+                    errorBox.textContent = data.message || "Failed to place bid";
+                } else {
+                    alert(data.message || "Failed to place bid");
+                }
+                return;
+            }
+
+            const currentBidEl = document.getElementById("currentBidValue");
+            if (currentBidEl) {
+                currentBidEl.textContent = formatINR(data.currentBid);
+            }
+
+            const totalBidsEl = document.getElementById("totalBidsValue");
+            if (totalBidsEl) {
+                totalBidsEl.textContent = data.totalBids;
+            }
+
+            const bidIncrement = Number(document.getElementById("bidIncrementValue")?.textContent || 0);
+            const nextMin = Number(data.currentBid) + bidIncrement;
+
+            const bidAmount = document.getElementById("bidAmount");
+            if (bidAmount) {
+                bidAmount.min = nextMin;
+                bidAmount.value = nextMin;
+            }
+
+            const availableEl = document.getElementById("availableBalanceValue");
+            if (availableEl && data.availableBalance !== undefined) {
+                availableEl.textContent = formatINR(data.availableBalance);
+            }
+
+            const heldEls = document.querySelectorAll(".wallet-mini-row strong");
+            if (heldEls.length >= 2 && data.heldBalance !== undefined) {
+                heldEls[1].textContent = formatINR(data.heldBalance);
+            }
+
+            const totalEls = document.querySelectorAll(".wallet-mini-row strong");
+            if (totalEls.length >= 1 && data.walletBalance !== undefined) {
+                totalEls[0].textContent = formatINR(data.walletBalance);
+            }
+
+            renderRecentBids(data.recentBids || []);
+
+            document.getElementById("bidSuccessText").textContent =
+                "Your bid " + formatINR(amountPlaced) + " has been placed.";
+            document.getElementById("bidSuccessModal").style.display = "block";
+        });
+
+        setInterval(() => refreshRecentBids(auctionId), 3000);
+    });
+</script>
+
+</body>
+</html>

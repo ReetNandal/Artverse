@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login | Artverse</title>
+    <link rel="stylesheet" href="/css/artverse.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="logo">ARTVERSE</div>
+</header>
+
+<section class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Welcome Back</h2>
+
+        <!-- ✅ Error message when login fails -->
+        <div th:if="${param.error}" class="auth-error">
+            You are not registered or your password is wrong.
+            <br>
+            <a href="/register">Click here to register</a>
+        </div>
+
+        <form th:action="@{/login}" method="post">
+            <label>Email or Username</label>
+            <input type="text" name="username" required>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <button class="btn-primary auth-btn" type="submit">Login</button>
+        </form>
+
+        <div class="auth-footer">
+            Don’t have an account? <a href="/register">Register</a>
+        </div>
+    </div>
+</section>
+</body>
+</html>

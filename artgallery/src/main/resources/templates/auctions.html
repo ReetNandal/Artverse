@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Live Auctions | Artverse</title>
+    <link rel="stylesheet" href="/css/artverse.css">
+
+</head>
+<script>
+    function startCountdowns() {
+        const countdownElements = document.querySelectorAll(".countdown");
+
+        function updateCountdowns() {
+            countdownElements.forEach(element => {
+                const endTimeMillis = element.getAttribute("data-end");
+
+                if (!endTimeMillis) {
+                    element.textContent = "00:00:00";
+                    return;
+                }
+
+                const endTime = parseInt(endTimeMillis, 10);
+                const now = Date.now();
+                const diff = endTime - now;
+
+                if (diff <= 0) {
+                    element.textContent = "Ended";
+                    return;
+                }
+
+                const totalSeconds = Math.floor(diff / 1000);
+                const totalHours = Math.floor(totalSeconds / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+
+                const pad = num => String(num).padStart(2, "0");
+                element.textContent = `${pad(totalHours)}:${pad(minutes)}:${pad(seconds)}`;
+            });
+        }
+
+        updateCountdowns();
+        setInterval(updateCountdowns, 1000);
+    }
+
+    document.addEventListener("DOMContentLoaded", startCountdowns);
+</script>
+<body>
+
+<header class="topbar">
+    <div class="logo-wrap">
+        <div class="logo-icon">🎨</div>
+        <div class="logo-text">
+            <div class="logo-title">ARTVERSE</div>
+            <div class="logo-tagline">CURATING THE FUTURE</div>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <a href="/artworks">Gallery</a>
+        <a href="/auctions" class="active">Auctions</a>
+        <a href="/collections">My Collections</a>
+        <a href="#">Artists</a>
+    </nav>
+
+    <a class="btn-primary" href="/logout">Logout</a>
+</header>
+
+<section class="hero hero-auctions">
+    <h1>Become an <span>ArtVerse</span> Collector</h1>
+    <p>Bid on exclusive artworks in real time and claim rare masterpieces from world-renowned artists.</p>
+</section>
+
+<section class="auction-filters">
+    <div class="filter-box">
+        <div class="filter-groups">
+            <div class="auction-tabs filter-row">
+                <a th:href="@{/auctions(status='LIVE', category=${category})}"
+                   th:classappend="${status == 'LIVE'} ? 'active' : ''"
+                   class="pill">Live Auctions</a>
+
+                <a th:href="@{/auctions(status='UPCOMING', category=${category})}"
+                   th:classappend="${status == 'UPCOMING'} ? 'active' : ''"
+                   class="pill">Upcoming</a>
+
+                <a th:href="@{/auctions(status='ENDED', category=${category})}"
+                   th:classappend="${status == 'ENDED'} ? 'active' : ''"
+                   class="pill">Closed</a>
+            </div>
+
+            <div class="auction-categories filter-row">
+                <a th:href="@{/auctions(status=${status})}"
+                   th:classappend="${category == null} ? 'active' : ''"
+                   class="pill">All Collections</a>
+
+                <a th:each="cat : ${categories}"
+                   th:href="@{/auctions(status=${status}, category=${cat})}"
+                   th:text="${cat}"
+                   th:classappend="${cat == category} ? 'active' : ''"
+                   class="pill">Category</a>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="auction-section">
+    <div th:switch="${status}">
+        <h2 th:case="'LIVE'">Currently Live</h2>
+        <h2 th:case="'UPCOMING'">Upcoming Auctions</h2>
+        <h2 th:case="'ENDED'">Closed Auctions</h2>
+        <h2 th:case="*">Auctions</h2>
+    </div>
+
+    <div class="auction-grid">
+        <div th:each="auction : ${auctions}" class="auction-card">
+            <div class="auction-image-wrap">
+                <img class="auction-image"
+                     th:src="${auction.artworkImageUrl}"
+                     alt="Artwork"
+                     onerror="this.style.display='none'">
+
+                <span class="auction-badge"
+                      th:classappend="${auction.status == 'UPCOMING'} ? ' upcoming' : (${auction.status == 'ENDED'} ? ' closed' : '')"
+                      th:text="${auction.status == 'LIVE' ? 'LIVE NOW' : (auction.status == 'UPCOMING' ? 'UPCOMING' : 'CLOSED')}">
+                    Status
+                </span>
+            </div>
+
+            <div class="auction-body">
+                <span class="auction-category" th:text="${auction.artworkCategory}">Category</span>
+                <h3 th:text="${auction.title}">Artwork Title</h3>
+                <p th:text="${auction.description}">Description</p>
+
+                <div class="auction-meta">
+                    <div>
+                        <div class="meta-label"
+                             th:text="${auction.status == 'UPCOMING' ? 'STARTS' : 'CURRENT BID'}">
+                            CURRENT BID
+                        </div>
+
+                        <div class="meta-value"
+                             th:text="${auction.status == 'UPCOMING' ? #temporals.format(auction.startTime, 'dd/MM/yyyy HH:mm') : auction.currentBid}">
+                            Value
+                        </div>
+                    </div>
+
+                    <div th:if="${auction.status == 'LIVE'}">
+                        <div class="meta-label">ENDS IN</div>
+                        <div class="meta-value countdown"
+                             th:attr="data-end=${auction.endTimeMillis}">
+                            00:00:00
+                        </div>
+                    </div>
+                </div>
+
+                <a class="btn-secondary"
+                   th:if="${auction.status == 'LIVE'}"
+                   th:href="@{/auction/{id}(id=${auction.id})}">
+                    Bid Now
+                </a>
+
+                <button class="btn-secondary"
+                        th:if="${auction.status == 'UPCOMING'}"
+                        disabled>
+                    Not Started
+                </button>
+
+                <button class="btn-secondary"
+                        th:if="${auction.status == 'ENDED'}"
+                        disabled>
+                    Closed
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="market-heatmap">
+    <h2>Live Market Heatmap</h2>
+    <p class="heatmap-subtitle">Real-time bidding intensity across major categories</p>
+
+    <div class="heatmap-grid">
+        <div th:each="item : ${heatmapData}"
+             class="heatmap-card"
+             th:classappend="' ' + ${item.cssClass}">
+
+            <div class="heatmap-title" th:text="${item.title}">Category</div>
+
+            <div class="heatmap-value">
+                <span th:text="${'+' + item.percentage}">+0.0</span>
+                <span>% VOL</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="heatmap-legend">
+        <span>ACTIVITY:</span>
+        <span class="legend-box legend-low"></span>
+        <span class="legend-box legend-med"></span>
+        <span class="legend-box legend-high"></span>
+        <span>Low → High</span>
+    </div>
+</section>
+
+
+<footer class="footer">
+    <div class="footer-top">
+        <div class="footer-brand">
+            <div class="footer-logo">🎨 ARTVERSE</div>
+            <p>The global standard for premium digital & physical art. Discover, collect, and trade the world's most sought-after masterpieces.</p>
+        </div>
+
+        <div class="footer-links">
+            <div>
+                <h4>PLATFORM</h4>
+                <a href="#">Gallery</a>
+                <a href="#">Auctions</a>
+                <a href="#">Collections</a>
+                <a href="#">Artists</a>
+            </div>
+            <div>
+                <h4>COMPANY</h4>
+                <a href="#">About Us</a>
+                <a href="#">Careers</a>
+                <a href="#">Press Kit</a>
+                <a href="#">Contact</a>
+            </div>
+            <div>
+                <h4>LEGAL</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Auction Terms</a>
+                <a href="#">Seller Agreement</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <span>© 2024 ArtVerse Inc. All rights reserved.</span>
+        <div class="socials">
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+            <a href="#">Discord</a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>
