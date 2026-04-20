@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Register | Artverse</title>
+    <link rel="stylesheet" href="/css/artverse.css">
+</head>
+<body>
+
+<header class="topbar">
+    <div class="logo">ARTVERSE</div>
+</header>
+
+<section class="auth-wrapper">
+    <div class="auth-card">
+        <h2>Create Account</h2>
+
+        <form th:action="@{/register}" method="post">
+            <label>First Name</label>
+            <input type="text" name="firstName" required>
+
+            <label>Last Name</label>
+            <input type="text" name="lastName" required>
+
+            <label>Username</label>
+            <input type="text" name="username" required>
+
+            <label>Email</label>
+            <input type="email" name="email" required>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <button class="btn-primary auth-btn" type="submit">Create Account</button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="/login">Login</a>
+        </div>
+    </div>
+</section>
+</body>
+</html>

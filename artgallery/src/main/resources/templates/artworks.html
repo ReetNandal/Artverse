@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Page metadata + CSS -->
+    <meta charset="UTF-8" />
+    <title>Artverse Gallery</title>
+    <link rel="stylesheet" href="/css/artverse.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+
+<!-- =========================
+     TOP NAVBAR
+     ========================= -->
+<header class="topbar">
+    <div class="logo-wrap">
+        <div class="logo-icon">🎨</div>
+        <div class="logo-text">
+            <div class="logo-title">ARTVERSE</div>
+            <div class="logo-tagline">CURATING THE FUTURE</div>
+        </div>
+    </div>
+    <nav class="header-nav">
+        <a th:href="@{/artworks}">Gallery</a>
+        <a th:href="@{/auctions}">Auctions</a>
+        <a th:href="@{/account(section='collection')}">My Collections</a>
+        <a th:href="@{/artists}">Artists</a>
+    </nav>
+    <div class="actions">
+        <a th:href="@{/account(section='create-listing')}" class="btn-primary">+ Create Listing</a>
+        <div class="avatar"></div>
+    </div>
+</header>
+
+<!-- =========================
+     HERO SECTION
+     ========================= -->
+<section class="hero">
+    <div class="badge">Trending this week</div>
+    <h1>Discover Our <span>Masterpieces</span></h1>
+    <p>Explore a curated selection of physical and digital art from world‑renowned artists.</p>
+
+    <!-- ✅ Server-side search form -->
+    <div class="search">
+        <form th:action="@{/artworks}" method="get" style="display:flex; gap:10px;">
+            <input type="text"
+                   name="q"
+                   placeholder="Search artists or artworks..."
+                   th:value="${q}" />
+            <!-- keep category while searching -->
+            <input type="hidden"
+                   name="category"
+                   th:if="${selectedCategory != null}"
+                   th:value="${selectedCategory}" />
+            <button class="btn-primary" type="submit">Explore Gallery</button>
+        </form>
+    </div>
+</section>
+
+<!-- =========================
+     FILTER BAR (SERVER-SIDE)
+     ========================= -->
+<section class="filters-bar">
+    <div class="filters-left">
+        <button class="btn-filter">☷ Filters</button>
+        <span class="divider"></span>
+
+        <!-- All collections -->
+        <a th:href="@{/artworks}"
+           th:classappend="${selectedCategory == null} ? 'active' : ''"
+           class="pill">All Collections</a>
+
+        <!-- Categories from DB -->
+        <a th:each="cat : ${categories}"
+           th:href="@{/artworks(category=${cat})}"
+           th:text="${cat}"
+           th:classappend="${cat == selectedCategory} ? 'active' : ''"
+           class="pill">Category</a>
+    </div>
+
+    <!-- Results count -->
+    <div class="filters-right">
+        Showing <strong th:text="${totalCount}">0</strong> results
+    </div>
+</section>
+
+
+<!-- ARTWORK GRID -->
+<section class="grid" id="artworkGrid">
+    <th:block th:fragment="cards">
+        <div class="card" th:each="artwork : ${artworks}">
+            <div class="card-image">
+                <img th:src="${artwork.imageUrl}" alt="Artwork Image"/>
+                <span class="card-pill" th:text="${artwork.category}">Category</span>
+            </div>
+
+            <h3 th:text="${artwork.title}">Artwork Title</h3>
+            <p>by <span th:text="${artwork.artistName}">Artist</span></p>
+            <div class="price">₹<span th:text="${artwork.estimatedPrice}">0</span></div>
+            <button class="btn-bid"
+                    type="button"
+                    th:attr="data-id=${artwork.id}"
+                    onclick="openArtworkPopup(this)">
+                View Now
+            </button>
+        </div>
+    </th:block>
+</section>
+
+<div class="load-more-wrap"
+     th:data-seed="${seed}"
+     th:data-category="${selectedCategory}"
+     th:data-q="${q}"
+     th:data-next-page="${nextPage}"
+     th:data-has-more="${hasMore}">
+    <button id="loadMoreBtn" class="btn-load-more" th:if="${hasMore}">Load More</button>
+</div>
+
+
+<section class="stats">
+    <div class="stat-card">
+        <div class="stat-icon">▦</div>
+        <div class="stat-value" th:text="${artworks.size()}">0</div>
+        <div class="stat-label">TOTAL ARTWORKS</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">3,542</div>
+        <div class="stat-label">ACTIVE BIDDERS</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-value">$12.5M+</div>
+        <div class="stat-label">TOTAL MARKET VALUE</div>
+    </div>
+</section>
+<div id="artworkModal" class="artwork-modal">
+    <div class="artwork-modal-content">
+        <span class="artwork-close" onclick="closeArtworkPopup()">&times;</span>
+
+        <div class="artwork-popup-layout">
+            <div class="artwork-popup-left">
+                <img id="popupImage" src="" alt="Artwork Image">
+            </div>
+
+            <div class="artwork-popup-right">
+                <div class="popup-top-tags">
+                    <span class="popup-category" id="popupCategory">Category</span>
+                </div>
+
+                <h1 id="popupTitle">Artwork Title</h1>
+                <h3 id="popupArtist">by Artist Name</h3>
+                <p id="popupDescription">Artwork description here.</p>
+
+                <div class="popup-price-box">
+                    <div class="popup-price-item">
+                        <span class="popup-label">PRICE</span>
+                        <h2 id="popupPrice">₹0</h2>
+                    </div>
+                </div>
+
+                <div class="popup-info-box">
+                    <h2>About this Artwork</h2>
+                    <ul>
+                        <li><strong>Technique:</strong> <span id="popupTechnique"></span></li>
+                        <li><strong>Year Made:</strong> <span id="popupYearMade"></span></li>
+                        <li><strong>Size Dimension:</strong> <span id="popupSizeDimension"></span></li>
+                        <li><strong>Orientation:</strong> <span id="popupOrientation"></span></li>
+                    </ul>
+                </div>
+
+                <div class="popup-story-box">
+                    <h2>The Artwork Story</h2>
+                    <p id="popupStory"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (() => {
+      const wrap = document.querySelector('.load-more-wrap');
+      const btn = document.getElementById('loadMoreBtn');
+      if (!wrap || !btn) return;
+
+      btn.addEventListener('click', async () => {
+        const seed = wrap.dataset.seed;
+        const category = wrap.dataset.category || '';
+        const q = wrap.dataset.q || '';
+        const nextPage = wrap.dataset.nextPage || '1';
+
+        const params = new URLSearchParams();
+        params.set('page', nextPage);
+        params.set('size', '8');
+        params.set('seed', seed);
+        params.set('fragment', 'true');
+        if (category) params.set('category', category);
+        if (q) params.set('q', q);
+
+        const res = await fetch(`/artworks?${params.toString()}`);
+        const html = await res.text();
+
+        const grid = document.getElementById('artworkGrid');
+        grid.insertAdjacentHTML('beforeend', html);
+
+        wrap.dataset.nextPage = String(parseInt(nextPage, 10) + 1);
+
+        if (html.trim().length === 0 || html.match(/class="card"/g)?.length < 8) {
+          btn.style.display = 'none';
+        }
+      });
+    })();
+</script>
+<script>
+    async function openArtworkPopup(button) {
+        const artworkId = button.getAttribute("data-id");
+
+        try {
+            const response = await fetch(`/artworks/api/${artworkId}`);
+            if (!response.ok) {
+                throw new Error("Failed to fetch artwork data");
+            }
+
+            const art = await response.json();
+
+            document.getElementById("popupImage").src = art.imageUrl || "";
+            document.getElementById("popupTitle").textContent = art.title || "Untitled";
+            document.getElementById("popupArtist").textContent = "by " + (art.artistName || "Unknown Artist");
+            document.getElementById("popupCategory").textContent = art.category || "Uncategorized";
+            document.getElementById("popupDescription").textContent = art.description || "No description available.";
+            document.getElementById("popupPrice").textContent = "₹" + (art.estimatedPrice || art.basePrice || 0);
+
+            document.getElementById("popupTechnique").textContent = art.technique || "N/A";
+            document.getElementById("popupYearMade").textContent = art.yearMade || "N/A";
+            document.getElementById("popupSizeDimension").textContent = art.sizeDimension || "N/A";
+            document.getElementById("popupOrientation").textContent = art.orientation || "N/A";
+            document.getElementById("popupStory").textContent = art.description || "No artwork story available.";
+
+            document.getElementById("artworkModal").style.display = "flex";
+            document.body.style.overflow = "hidden";
+        } catch (error) {
+            console.error("Error loading artwork popup:", error);
+            alert("Could not load artwork details.");
+        }
+    }
+
+    function closeArtworkPopup() {
+        document.getElementById("artworkModal").style.display = "none";
+        document.body.style.overflow = "auto";
+    }
+
+    window.addEventListener("click", function(event) {
+        const modal = document.getElementById("artworkModal");
+        if (event.target === modal) {
+            closeArtworkPopup();
+        }
+    });
+</script>
+<!-- =========================
+     FOOTER
+     ========================= -->
+<footer class="footer">
+    <div class="footer-top">
+        <div class="footer-brand">
+            <div class="footer-logo">🎨 ARTVERSE</div>
+            <p>The global standard for premium digital & physical art. Discover, collect, and trade the world's most sought‑after masterpieces.</p>
+        </div>
+
+        <div class="footer-links">
+            <div>
+                <h4>PLATFORM</h4>
+                <a href="#">Gallery</a>
+                <a href="#">Auctions</a>
+                <a href="#">Collections</a>
+                <a href="#">Artists</a>
+            </div>
+            <div>
+                <h4>COMPANY</h4>
+                <a href="#">About Us</a>
+                <a href="#">Careers</a>
+                <a href="#">Press Kit</a>
+                <a href="#">Contact</a>
+            </div>
+            <div>
+                <h4>LEGAL</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Auction Terms</a>
+                <a href="#">Seller Agreement</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <span>© 2024 ArtVerse Inc. All rights reserved.</span>
+        <div class="socials">
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+            <a href="#">Discord</a>
+        </div>
+    </div>
+</footer>
+</body>
+</html>
