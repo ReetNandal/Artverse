@@ -7,30 +7,13 @@
     <link rel="stylesheet" href="/css/artverse.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
+
 <body>
 
 <!-- =========================
      TOP NAVBAR
      ========================= -->
-<header class="topbar">
-    <div class="logo-wrap">
-        <div class="logo-icon">🎨</div>
-        <div class="logo-text">
-            <div class="logo-title">ARTVERSE</div>
-            <div class="logo-tagline">CURATING THE FUTURE</div>
-        </div>
-    </div>
-    <nav class="header-nav">
-        <a th:href="@{/artworks}">Gallery</a>
-        <a th:href="@{/auctions}">Auctions</a>
-        <a th:href="@{/account(section='collection')}">My Collections</a>
-        <a th:href="@{/artists}">Artists</a>
-    </nav>
-    <div class="actions">
-        <a th:href="@{/account(section='create-listing')}" class="btn-primary">+ Create Listing</a>
-        <div class="avatar"></div>
-    </div>
-</header>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
 
 <!-- =========================
      HERO SECTION
@@ -261,45 +244,7 @@
 <!-- =========================
      FOOTER
      ========================= -->
-<footer class="footer">
-    <div class="footer-top">
-        <div class="footer-brand">
-            <div class="footer-logo">🎨 ARTVERSE</div>
-            <p>The global standard for premium digital & physical art. Discover, collect, and trade the world's most sought‑after masterpieces.</p>
-        </div>
-
-        <div class="footer-links">
-            <div>
-                <h4>PLATFORM</h4>
-                <a href="#">Gallery</a>
-                <a href="#">Auctions</a>
-                <a href="#">Collections</a>
-                <a href="#">Artists</a>
-            </div>
-            <div>
-                <h4>COMPANY</h4>
-                <a href="#">About Us</a>
-                <a href="#">Careers</a>
-                <a href="#">Press Kit</a>
-                <a href="#">Contact</a>
-            </div>
-            <div>
-                <h4>LEGAL</h4>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Auction Terms</a>
-                <a href="#">Seller Agreement</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer-bottom">
-        <span>© 2024 ArtVerse Inc. All rights reserved.</span>
-        <div class="socials">
-            <a href="#">Twitter</a>
-            <a href="#">Instagram</a>
-            <a href="#">Discord</a>
-        </div>
-    </div>
-</footer>
+<footer th:replace="fragments/footer :: siteFooter"></footer>
+<script src="/js/menu.js"></script>
 </body>
 </html>

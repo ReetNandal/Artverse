@@ -21,7 +21,9 @@
 
     <div class="header-right">
         <span th:text="${user.firstName}">Reet</span>
-        <a th:href="@{/logout}" class="logout-link">Logout</a>
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit" class="logout-link">Logout</button>
+        </form>
     </div>
 </header>
 
@@ -42,9 +44,7 @@
             </div>
         </div>
 
-        <div class="logout-box">
-            <a th:href="@{/logout}" class="logout-btn logout-link-btn">LOGOUT</a>
-        </div>
+
     </aside>
 
     <!-- MAIN -->

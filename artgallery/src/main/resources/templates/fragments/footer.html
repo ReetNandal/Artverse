@@ -1,0 +1,45 @@
+<footer th:fragment="siteFooter" class="footer">
+    <div class="footer-top">
+        <div class="footer-brand">
+            <div class="footer-logo">🎨 ARTVERSE</div>
+            <p>
+                The global standard for premium digital & physical art.
+                Discover, collect, and trade the world’s most sought‑after masterpieces.
+            </p>
+        </div>
+
+        <div class="footer-links">
+            <div>
+                <h4>PLATFORM</h4>
+                <a th:href="@{/artworks}">Gallery</a>
+                <a th:href="@{/auctions}">Auctions</a>
+                <a th:href="@{/account(section='collection')}">My Collections</a>
+                <a th:href="@{/artists}">Artists</a>
+            </div>
+
+            <div>
+                <h4>COMPANY</h4>
+                <a href="#">About Us</a>
+                <a href="#">Careers</a>
+                <a href="#">Press Kit</a>
+                <a href="#">Contact</a>
+            </div>
+
+            <div>
+                <h4>LEGAL</h4>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Auction Terms</a>
+                <a href="#">Seller Agreement</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <span>© 2024 ArtVerse Inc. All rights reserved.</span>
+        <div class="socials">
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+            <a href="#">Discord</a>
+        </div>
+    </div>
+</footer>

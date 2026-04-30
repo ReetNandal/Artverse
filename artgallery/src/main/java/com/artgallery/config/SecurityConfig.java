@@ -20,9 +20,20 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        System.out.println(">>> SECURITY CONFIG LOADED");
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/login", "/css/**").permitAll()
+                        .requestMatchers(
+                                "/",           // home -> auctions
+                                "/auctions",    // auctions page
+                                "/artworks",    // gallery page
+                                "/artworks/**",
+                                "/artists",     // artists page
+                                "/css/**",
+                                "/images/**",
+                                "/login",
+                                "/register"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -34,11 +45,15 @@ public class SecurityConfig {
 
                 )
                 .logout(logout -> logout
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")   // homepage
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
                 );
 
         return http.build();
     }
+
 
     @Bean
     public DaoAuthenticationProvider authProvider() {
