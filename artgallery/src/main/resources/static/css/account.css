@@ -2115,3 +2115,17 @@
     grid-template-columns: 1fr;
   }
 }
+.logout-form {
+    display: inline;
+}
+
+.logout-link {
+    background: #f28e72;
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 700;
+    text-decoration: none;
+}

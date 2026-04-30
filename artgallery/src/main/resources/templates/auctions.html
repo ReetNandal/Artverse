@@ -44,26 +44,10 @@
 
     document.addEventListener("DOMContentLoaded", startCountdowns);
 </script>
+
 <body>
 
-<header class="topbar">
-    <div class="logo-wrap">
-        <div class="logo-icon">🎨</div>
-        <div class="logo-text">
-            <div class="logo-title">ARTVERSE</div>
-            <div class="logo-tagline">CURATING THE FUTURE</div>
-        </div>
-    </div>
-
-    <nav class="nav">
-        <a href="/artworks">Gallery</a>
-        <a href="/auctions" class="active">Auctions</a>
-        <a href="/collections">My Collections</a>
-        <a href="#">Artists</a>
-    </nav>
-
-    <a class="btn-primary" href="/logout">Logout</a>
-</header>
+<header th:replace="~{fragments/header :: siteHeader}"></header>
 
 <section class="hero hero-auctions">
     <h1>Become an <span>ArtVerse</span> Collector</h1>
@@ -102,14 +86,16 @@
     </div>
 </section>
 <section class="auction-section">
-    <div th:switch="${status}">
-        <h2 th:case="'LIVE'">Currently Live</h2>
-        <h2 th:case="'UPCOMING'">Upcoming Auctions</h2>
-        <h2 th:case="'ENDED'">Closed Auctions</h2>
-        <h2 th:case="*">Auctions</h2>
-    </div>
+    <div class="auction-container">
 
-    <div class="auction-grid">
+        <div th:switch="${status}">
+            <h2 class="auction-heading" th:case="'LIVE'">Currently Live</h2>
+            <h2 class="auction-heading" th:case="'UPCOMING'">Upcoming Auctions</h2>
+            <h2 class="auction-heading" th:case="'ENDED'">Closed Auctions</h2>
+            <h2 class="auction-heading" th:case="*">Auctions</h2>
+        </div>
+
+        <div class="auction-grid">
         <div th:each="auction : ${auctions}" class="auction-card">
             <div class="auction-image-wrap">
                 <img class="auction-image"
@@ -169,6 +155,7 @@
                     Closed
                 </button>
             </div>
+            </div>
         </div>
     </div>
 </section>
@@ -201,46 +188,8 @@
 </section>
 
 
-<footer class="footer">
-    <div class="footer-top">
-        <div class="footer-brand">
-            <div class="footer-logo">🎨 ARTVERSE</div>
-            <p>The global standard for premium digital & physical art. Discover, collect, and trade the world's most sought-after masterpieces.</p>
-        </div>
-
-        <div class="footer-links">
-            <div>
-                <h4>PLATFORM</h4>
-                <a href="#">Gallery</a>
-                <a href="#">Auctions</a>
-                <a href="#">Collections</a>
-                <a href="#">Artists</a>
-            </div>
-            <div>
-                <h4>COMPANY</h4>
-                <a href="#">About Us</a>
-                <a href="#">Careers</a>
-                <a href="#">Press Kit</a>
-                <a href="#">Contact</a>
-            </div>
-            <div>
-                <h4>LEGAL</h4>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Auction Terms</a>
-                <a href="#">Seller Agreement</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="footer-bottom">
-        <span>© 2024 ArtVerse Inc. All rights reserved.</span>
-        <div class="socials">
-            <a href="#">Twitter</a>
-            <a href="#">Instagram</a>
-            <a href="#">Discord</a>
-        </div>
-    </div>
-</footer>
+<footer th:replace="~{fragments/footer :: siteFooter}"></footer>
+<script src="/js/menu.js"></script>
 
 </body>
 </html>

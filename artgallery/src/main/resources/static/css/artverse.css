@@ -476,9 +476,10 @@ body { background: var(--bg); color: var(--text); }
 
 .auction-grid {
     display: grid;
-    grid-template-columns: repeat(4, 300px);
+    grid-template-columns: repeat(4, 300px); /* EXACTLY 4 cards */
     gap: 24px;
-    justify-content: start;
+
+    justify-content: center;  /* ✅ center whole grid */
 }
 
 .auction-card {
@@ -735,110 +736,6 @@ body { background: var(--bg); color: var(--text); }
 }
 .legend-low { background: #ffd8c2; }
 .legend-med { background: #ffb07a; }
-.legend-high { background: #ff8c5a; }
-body {
-    margin: 0;
-    background: #faf6f1;
-    color: #1f1f1f;
-    font-family: Arial, sans-serif;
-}
-
-.topbar,
-.hero,
-.auction-filters,
-.auction-section,
-.market-heatmap,
-.footer {
-    max-width: 1440px;
-    margin-left: auto;
-    margin-right: auto;
-}
-.countdown {
-    font-weight: 700;
-    color: #1f1f1f;
-    letter-spacing: 0.5px;
-}
-.auction-detail-page {
-    padding: 30px 40px 50px;
-}
-
-.auction-detail-grid {
-    display: grid;
-    grid-template-columns: 360px 1fr 320px;
-    gap: 28px;
-    align-items: start;
-}
-
-.detail-image-card,
-.detail-info-card,
-.detail-story-card,
-.bid-panel,
-.activity-panel,
-.detail-price-panel {
-    background: #fff;
-    border-radius: 24px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.05);
-}
-
-.detail-image-card {
-    padding: 18px;
-}
-
-.detail-main-image {
-    width: 100%;
-    height: 440px;
-    object-fit: cover;
-    border-radius: 18px;
-}
-
-.detail-badges {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.detail-pill {
-    background: #fff1e7;
-    color: #e78d55;
-    padding: 8px 14px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.detail-pill.soft {
-    background: #f5f5f5;
-    color: #444;
-}
-
-.detail-title {
-    font-size: 48px;
-    line-height: 1.05;
-    margin: 0 0 10px;
-    color: #1f1f1f;
-}
-
-.detail-artist {
-    font-size: 20px;
-    color: #5f5f5f;
-    margin-bottom: 14px;
-}
-
-.detail-description {
-    font-size: 18px;
-    color: #666;
-    line-height: 1.6;
-    margin-bottom: 22px;
-}
-
-.detail-price-panel {
-    padding: 24px;
-    display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr 0.8fr;
-    gap: 18px;
-    margin-bottom: 22px;
-}
-
 .detail-label {
     font-size: 12px;
     text-transform: uppercase;
@@ -1133,4 +1030,128 @@ body {
     .artwork-popup-right h1 {
         font-size: 38px;
     }
+}
+
+/* Active nav link */
+.header-nav a.active {
+    color: var(--accent-dark);
+}
+
+
+@media (max-width: 768px) {
+  .header-nav {
+    display: none;
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    flex-direction: column;
+    gap: 10px;
+    z-index: 2000;
+  }
+
+  .header-nav.open {
+    display: flex;
+  }
+}
+.topbar {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 64px;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+/* =============================
+   AVATAR DROPDOWN MENU
+   ============================= */
+
+.avatar-menu {
+    position: relative;
+}
+
+/* Avatar button */
+.avatar-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Avatar image */
+.avatar-img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Dropdown box */
+.avatar-dropdown {
+    position: absolute;
+    right: 0;
+    top: 50px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 10px 0;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    min-width: 240px;
+
+    display: none;   /* hidden by default */
+    z-index: 9999;
+}
+
+/* Show dropdown when open */
+.avatar-menu.open .avatar-dropdown {
+    display: block;
+}
+
+/* Menu items */
+.avatar-dropdown a,
+.avatar-dropdown button {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 15px;
+    color: #444;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Hover effect */
+.avatar-dropdown a:hover,
+.avatar-dropdown button:hover {
+    background: #fff3ea;
+    color: #f28e72;
+}
+
+/* Logout button (optional styling) */
+.logout-link {
+    color: #e25c4b;
+    font-weight: 600;
+}
+.auction-section {
+    padding: 10px 40px 30px;
+}
+
+.auction-container {
+    max-width: 1272px;
+    margin: 0 auto;
+}
+
+.auction-heading {
+    margin: 15px 0 18px;
 }

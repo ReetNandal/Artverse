@@ -1,0 +1,69 @@
+<div th:fragment="siteHeader" class="topbar"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+  <!-- Logo -->
+  <div class="logo-wrap">
+    <div class="logo-icon">🎨</div>
+    <div class="logo-text">
+      <div class="logo-title">ARTVERSE</div>
+      <div class="logo-tagline">CURATING THE FUTURE</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="header-nav" id="mainNav">
+    <a th:href="@{/artworks}">Gallery</a>
+    <a th:href="@{/auctions}">Auctions</a>
+    <a th:href="@{/account(section='collection')}">My Collections</a>
+    <a th:href="@{/artists}">Artists</a>
+  </nav>
+
+  <!-- Right Actions -->
+  <div class="actions">
+
+    <!-- Create Listing -->
+    <a sec:authorize="isAuthenticated()"
+       th:href="@{/account(section='create-listing')}"
+       class="btn-primary">+ Create Listing</a>
+
+    <a sec:authorize="isAnonymous()"
+       th:href="@{/login}"
+       class="btn-primary">+ Create Listing</a>
+
+    <!-- Avatar Menu (ALWAYS VISIBLE) -->
+    <div class="avatar-menu">
+
+      <!-- Avatar Button -->
+      <button class="avatar-btn" type="button" aria-label="Open menu">
+        <img src="/images/user-avatar.jpg" alt="User" class="avatar-img">
+      </button>
+
+      <!-- Dropdown -->
+      <div class="avatar-dropdown">
+
+        <!-- ✅ Logged IN Menu -->
+        <div sec:authorize="isAuthenticated()">
+          <a th:href="@{/account(section='profile')}">Profile</a>
+          <a th:href="@{/account(section='wallet')}">Wallet</a>
+          <a th:href="@{/account(section='result')}">Result</a>
+          <a th:href="@{/account(section='shipping')}">Shipping Address</a>
+          <a th:href="@{/account(section='collection')}">My Collection</a>
+          <a th:href="@{/account(section='listings')}">My Listings</a>
+
+          <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-link">Logout</button>
+          </form>
+        </div>
+
+        <!-- ✅ Logged OUT Menu -->
+        <div sec:authorize="!isAuthenticated()">
+          <a th:href="@{/login}">Login</a>
+          <a th:href="@{/register}">Register</a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
